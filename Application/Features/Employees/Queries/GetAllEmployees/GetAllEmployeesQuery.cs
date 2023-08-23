@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Wrappers;
 using AutoMapper;
+using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace Application.Features.Employees.Queries.GetAllEmployees
     {
         public string KeyWord { get; set; }
     }
+
     public class GetAllEmployeesQueryHandler : IRequestHandler<GetAllEmployeesQuery, Response<IEnumerable<GetAllEmployeesViewModel>>>
     {
         private readonly IEmployeeRepositoryAsync _employeeRepository;
@@ -27,15 +29,20 @@ namespace Application.Features.Employees.Queries.GetAllEmployees
         public async Task<Response<IEnumerable<GetAllEmployeesViewModel>>> Handle(GetAllEmployeesQuery request, CancellationToken cancellationToken)
         {
             var validFilter = _mapper.Map<GetAllEmployeesParameter>(request);
-            var query = _employeeRepository.GetQueryable();
+
+            List<Employee> employee;
             if (!string.IsNullOrEmpty(validFilter.KeyWord))
             {
-                query = query.Where(x => x.Name.Contains(validFilter.KeyWord) ||
+                employee = (await _employeeRepository.GetAllAsync(x => x.Name.Contains(validFilter.KeyWord) ||
                 x.Email.Contains(validFilter.KeyWord) ||
-                x.Department.Contains(validFilter.KeyWord));
+                x.Department.Contains(validFilter.KeyWord))).ToList();
             }
-            var Employee = await query.ToListAsync();
-            var employeeViewModel = _mapper.Map<IEnumerable<GetAllEmployeesViewModel>>(Employee);
+            else
+            {
+                employee = (await _employeeRepository.GetAllAsync()).ToList();
+            }
+
+            var employeeViewModel = _mapper.Map<IEnumerable<GetAllEmployeesViewModel>>(employee);
             return new Response<IEnumerable<GetAllEmployeesViewModel>>(employeeViewModel);           
         }
     }

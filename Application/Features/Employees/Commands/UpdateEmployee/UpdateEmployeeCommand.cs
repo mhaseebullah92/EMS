@@ -18,32 +18,32 @@ namespace Application.Features.Employees.Commands.UpdateEmployee
         public string Phone { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string Department { get; set; }
+    }
 
-        public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeCommand, Response<int>>
+    public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeCommand, Response<int>>
+    {
+        private readonly IEmployeeRepositoryAsync _employeeRepository;
+        public UpdateEmployeeCommandHandler(IEmployeeRepositoryAsync employeeRepository)
         {
-            private readonly IEmployeeRepositoryAsync _employeeRepository;
-            public UpdateEmployeeCommandHandler(IEmployeeRepositoryAsync employeeRepository)
-            {
-                _employeeRepository = employeeRepository;
-            }
-            public async Task<Response<int>> Handle(UpdateEmployeeCommand command, CancellationToken cancellationToken)
-            {
-                var Employee = await _employeeRepository.GetByIdAsync(command.Id);
+            _employeeRepository = employeeRepository;
+        }
+        public async Task<Response<int>> Handle(UpdateEmployeeCommand command, CancellationToken cancellationToken)
+        {
+            var Employee = await _employeeRepository.GetByIdAsync(command.Id);
 
-                if (Employee == null)
-                {
-                    throw new ApiException($"Employee Not Found.");
-                }
-                else
-                {
-                    Employee.Name = command.Name;
-                    Employee.Email = command.Email;
-                    Employee.Phone = command.Phone;
-                    Employee.DateOfBirth = command.DateOfBirth;
-                    Employee.Department = command.Department;
-                    await _employeeRepository.UpdateAsync(Employee);
-                    return new Response<int>(Employee.Id);
-                }
+            if (Employee == null)
+            {
+                throw new ApiException($"Employee Not Found.");
+            }
+            else
+            {
+                Employee.Name = command.Name;
+                Employee.Email = command.Email;
+                Employee.Phone = command.Phone;
+                Employee.DateOfBirth = command.DateOfBirth;
+                Employee.Department = command.Department;
+                await _employeeRepository.UpdateAsync(Employee);
+                return new Response<int>(Employee.Id);
             }
         }
     }
