@@ -1,12 +1,7 @@
-﻿using Application.Filters;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Features.Employees.Queries.GetAllEmployees
+﻿namespace Application.Features.Employees.Queries.GetAllEmployees
 {
-    public class GetAllEmployeesParameter : RequestParameter
+    public class GetAllEmployeesParameter
     {
-
+        public string KeyWord { get; set; }
     }
 }

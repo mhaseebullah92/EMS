@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,16 +22,6 @@ namespace Infrastructure.Persistence.Repository
         public virtual async Task<T> GetByIdAsync(int id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
-        }
-
-        public async Task<IReadOnlyList<T>> GetPagedReponseAsync(int pageNumber, int pageSize)
-        {
-            return await _dbContext
-                .Set<T>()
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .AsNoTracking()
-                .ToListAsync();
         }
 
         public async Task<T> AddAsync(T entity)
@@ -57,6 +48,19 @@ namespace Infrastructure.Persistence.Repository
             return await _dbContext
                  .Set<T>()
                  .ToListAsync();
+        }
+
+        public IQueryable<T> GetQueryable(params Expression<Func<T, object>>[] includes)
+        {
+            var query = _dbContext
+                .Set<T>()
+                .AsQueryable();
+            if (includes != null)
+            {
+                query = includes.Aggregate(query,
+                          (current, include) => current.Include(include));
+            }
+            return query;
         }
     }
 }

@@ -1,22 +1,20 @@
-﻿using Application.Filters;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Application.Wrappers;
 using AutoMapper;
 using MediatR;
-using System;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Features.Employees.Queries.GetAllEmployees
 {
-    public class GetAllEmployeesQuery : IRequest<PagedResponse<IEnumerable<GetAllEmployeesViewModel>>>
+    public class GetAllEmployeesQuery : IRequest<Response<IEnumerable<GetAllEmployeesViewModel>>>
     {
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
+        public string KeyWord { get; set; }
     }
-    public class GetAllEmployeesQueryHandler : IRequestHandler<GetAllEmployeesQuery, PagedResponse<IEnumerable<GetAllEmployeesViewModel>>>
+    public class GetAllEmployeesQueryHandler : IRequestHandler<GetAllEmployeesQuery, Response<IEnumerable<GetAllEmployeesViewModel>>>
     {
         private readonly IEmployeeRepositoryAsync _employeeRepository;
         private readonly IMapper _mapper;
@@ -26,12 +24,19 @@ namespace Application.Features.Employees.Queries.GetAllEmployees
             _mapper = mapper;
         }
 
-        public async Task<PagedResponse<IEnumerable<GetAllEmployeesViewModel>>> Handle(GetAllEmployeesQuery request, CancellationToken cancellationToken)
+        public async Task<Response<IEnumerable<GetAllEmployeesViewModel>>> Handle(GetAllEmployeesQuery request, CancellationToken cancellationToken)
         {
             var validFilter = _mapper.Map<GetAllEmployeesParameter>(request);
-            var Employee = await _employeeRepository.GetPagedReponseAsync(validFilter.PageNumber,validFilter.PageSize);
+            var query = _employeeRepository.GetQueryable();
+            if (!string.IsNullOrEmpty(validFilter.KeyWord))
+            {
+                query = query.Where(x => x.Name.Contains(validFilter.KeyWord) ||
+                x.Email.Contains(validFilter.KeyWord) ||
+                x.Department.Contains(validFilter.KeyWord));
+            }
+            var Employee = await query.ToListAsync();
             var employeeViewModel = _mapper.Map<IEnumerable<GetAllEmployeesViewModel>>(Employee);
-            return new PagedResponse<IEnumerable<GetAllEmployeesViewModel>>(employeeViewModel, validFilter.PageNumber, validFilter.PageSize);           
+            return new Response<IEnumerable<GetAllEmployeesViewModel>>(employeeViewModel);           
         }
     }
 }

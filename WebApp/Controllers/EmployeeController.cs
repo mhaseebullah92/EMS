@@ -16,7 +16,7 @@ namespace WebApp.Controllers
         public async Task<IActionResult> Get([FromQuery] GetAllEmployeesParameter filter)
         {
 
-            return Ok(await Mediator.Send(new GetAllEmployeesQuery() { PageSize = filter.PageSize, PageNumber = filter.PageNumber }));
+            return Ok(await Mediator.Send(new GetAllEmployeesQuery() { KeyWord = filter.KeyWord }));
         }
 
         // GET api/<controller>/5
@@ -28,7 +28,6 @@ namespace WebApp.Controllers
 
         // POST api/<controller>
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> Post(CreateEmployeeCommand command)
         {
             return Ok(await Mediator.Send(command));
@@ -36,7 +35,6 @@ namespace WebApp.Controllers
 
         // PUT api/<controller>/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> Put(int id, UpdateEmployeeCommand command)
         {
             if (id != command.Id)
@@ -48,7 +46,6 @@ namespace WebApp.Controllers
 
         // DELETE api/<controller>/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             return Ok(await Mediator.Send(new DeleteEmployeeByIdCommand { Id = id }));
