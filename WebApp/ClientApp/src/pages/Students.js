@@ -9,7 +9,7 @@ const Students = ({ props }) => {
 
     const [students, setStudents] = useState([]);
     const [addStudentModal, setAddStudentModal] = useState({ show: false });
-    const [keyWord, setKeyWord] = useState(null);
+    const [keyWord, setKeyWord] = useState('');
 
     useEffect(() => {
         getStudents();

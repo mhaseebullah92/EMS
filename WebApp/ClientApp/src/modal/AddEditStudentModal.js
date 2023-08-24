@@ -3,11 +3,19 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import HTTPService from "../services/HTTPService"
+import { ToastContainer, toast } from 'react-toastify';
 
 const AddEditStudentModal = ({ props }) => {
 
     const [show, setShow] = useState(false);
-    const [student, setStudent] = useState({ id: '', name: '', email: '', phone: '', dateOfBirth: '', department: '' });
+    const [student, setStudent] = useState({
+        id: '',
+        name: '',
+        email: '',
+        phone: '',
+        dateOfBirth: '',
+        department: ''
+    });
     const [edit, setEdit] = useState(false);
     const [validated, setValidated] = useState(false);
 
@@ -20,16 +28,19 @@ const AddEditStudentModal = ({ props }) => {
 
     const handleSubmit = async (event) => {
         const form = event.currentTarget;
-        if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-        } else {
+        if (form.checkValidity() === true) {
             const response = edit ? await HTTPService.put(`/api/employee/${student.id}`, student) : await HTTPService.post(`/api/employee`, student);
+            debugger;
             if (response.succeeded) {
                 handleClose();
                 props.onClose();
+            } else {
+                toast.error(response.message);
             }
+          
         }
+        event.preventDefault();
+          event.stopPropagation();
         setValidated(true);
       };
 
@@ -44,8 +55,11 @@ const AddEditStudentModal = ({ props }) => {
     }, [props]);
 
     return <>
+        <ToastContainer position="bottom-right" />
         <Modal show={show} onHide={handleClose}>
-            <Form noValidate validated={validated} onSubmit={handleSubmit}>
+            <Form noValidate validated={validated} onSubmit={async (event) => {
+                await handleSubmit(event);
+            }}>
                 <Modal.Header closeButton>
                     <Modal.Title>{edit ? 'Edit' : 'Add'} student</Modal.Title>
                 </Modal.Header>
@@ -110,7 +124,7 @@ const AddEditStudentModal = ({ props }) => {
 
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
+                    <Button type='button' variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
                     <Button type="submit" variant="primary">
