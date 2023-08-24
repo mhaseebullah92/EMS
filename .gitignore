@@ -341,3 +341,5 @@ healthchecksdb
 
 WebApi/appsettings.Development.json
 VSIXCore/
+
+*.arm.json

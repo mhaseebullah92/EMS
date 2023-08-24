@@ -3,7 +3,6 @@ using Application.Features.Employees.Commands.DeleteEmployeeById;
 using Application.Features.Employees.Commands.UpdateEmployee;
 using Application.Features.Employees.Queries.GetAllEmployees;
 using Application.Features.Employees.Queries.GetEmployeeById;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 

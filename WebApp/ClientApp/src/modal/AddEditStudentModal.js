@@ -9,20 +9,29 @@ const AddEditStudentModal = ({ props }) => {
     const [show, setShow] = useState(false);
     const [student, setStudent] = useState({ id: '', name: '', email: '', phone: '', dateOfBirth: '', department: '' });
     const [edit, setEdit] = useState(false);
+    const [validated, setValidated] = useState(false);
 
     const handleClose = () => {
-        setStudent({ id: '', name: '', email: '', phone: '', dateOfBirth: '', department: '' })
-        setEdit(false);
         setShow(false);
+        setValidated(false);
+        setEdit(false);
+        setStudent({ id: '', name: '', email: '', phone: '', dateOfBirth: '', department: '' })
     };
 
-    const handleSubmit = async () => {
-        const response = edit ? await HTTPService.put(`/api/employee/${student.id}`, student) : await HTTPService.post(`/api/employee`, student);
-        if (response.succeeded) {
-            handleClose();
-            props.onClose();
+    const handleSubmit = async (event) => {
+        const form = event.currentTarget;
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        } else {
+            const response = edit ? await HTTPService.put(`/api/employee/${student.id}`, student) : await HTTPService.post(`/api/employee`, student);
+            if (response.succeeded) {
+                handleClose();
+                props.onClose();
+            }
         }
-    };
+        setValidated(true);
+      };
 
     useEffect(() => {
         if (props) {
@@ -36,28 +45,34 @@ const AddEditStudentModal = ({ props }) => {
 
     return <>
         <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-                <Modal.Title>{edit ? 'Edit' : 'Add'} student</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form>
+            <Form noValidate validated={validated} onSubmit={handleSubmit}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{edit ? 'Edit' : 'Add'} student</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
                     <Form.Group className="mb-3">
                         <Form.Label>Name</Form.Label>
-                        <Form.Control type="text" placeholder="name" onChange={(e) => {
+                        <Form.Control type="text" placeholder="name" required onChange={(e) => {
                             setStudent({
                                 ...student,
                                 name: e.target.value
                             })
                         }} value={student.name} />
+                        <Form.Control.Feedback type="invalid">
+                            * required
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Email address</Form.Label>
-                        <Form.Control type="email" placeholder="email" onChange={(e) => {
+                        <Form.Control type="email" placeholder="email" required onChange={(e) => {
                             setStudent({
                                 ...student,
                                 email: e.target.value
                             })
                         }} value={student.email} />
+                        <Form.Control.Feedback type="invalid">
+                            { student.email ? '* invalid value': '* required' }
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Phone</Form.Label>
@@ -70,32 +85,39 @@ const AddEditStudentModal = ({ props }) => {
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Date of birth</Form.Label>
-                        <Form.Control type="date" placeholder="date" onChange={(e) => {
+                        <Form.Control type="date" placeholder="date" required onChange={(e) => {
                             setStudent({
                                 ...student,
                                 dateOfBirth: e.target.value
                             })
                         }} value={student.dateOfBirth} />
+                        <Form.Control.Feedback type="invalid">
+                            * required
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Department</Form.Label>
-                        <Form.Control type="type" placeholder="department" onChange={(e) => {
+                        <Form.Control type="type" placeholder="department" required onChange={(e) => {
                             setStudent({
                                 ...student,
                                 department: e.target.value
                             })
                         }} value={student.department} />
+                        <Form.Control.Feedback type="invalid">
+                            * required
+                        </Form.Control.Feedback>
                     </Form.Group>
-                </Form>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Close
-                </Button>
-                <Button variant="primary" onClick={handleSubmit}>
-                    Save
-                </Button>
-            </Modal.Footer>
+
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Close
+                    </Button>
+                    <Button type="submit" variant="primary">
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Form>
         </Modal>
     </>;
 }
